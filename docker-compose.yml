@@ -1,0 +1,40 @@
+version: '3.6'
+
+services:
+  zadanie:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: zadanie
+    ports:
+      - "8080:8080"
+    networks:
+      - testNetwork
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+    expose:
+      - 8080
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: avito
+    networks:
+      - testNetwork
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres -d avito'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  testNetwork:
+    driver: bridge
